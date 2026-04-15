@@ -14,6 +14,19 @@ export const STORAGE_KEYS = {
   SETTINGS: 'colorSortPuzzle_settings',
   TOTAL_MOVES: 'colorSortPuzzle_totalMoves',
   HINTS_REMAINING: 'colorSortPuzzle_hintsRemaining',
+  COINS: 'colorSortPuzzle_coins',
+  DAILY_REWARD_DATE: 'colorSortPuzzle_dailyRewardDate',
+  DAILY_REWARD_STREAK: 'colorSortPuzzle_dailyRewardStreak',
+};
+
+export const COINS_CONFIG = {
+  STARTING_COINS: 200,
+  LEVEL_COMPLETE_REWARD: 25,
+  THREE_STAR_BONUS: 30,
+  TWO_STAR_BONUS: 15,
+  HINT_COST: 50,
+  EXTRA_TUBE_COST: 75,
+  DAILY_REWARDS: [50, 75, 100, 125, 150, 200, 300],
 };
 
 export const DEFAULT_SETTINGS = {

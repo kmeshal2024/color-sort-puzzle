@@ -5,19 +5,19 @@ import BottomBar from './BottomBar';
 import LevelComplete from './LevelComplete';
 import Confetti from './Confetti';
 import { useGameLogic } from '../hooks/useGameLogic';
-import { useSound } from '../hooks/useSound';
 import { isValidMove, getHint } from '../utils/solver';
-import { MAX_BALLS_PER_TUBE } from '../utils/constants';
+import { MAX_BALLS_PER_TUBE, COINS_CONFIG } from '../utils/constants';
 
 export default function Game({
   level,
   settings,
   hintsRemaining,
+  coins,
   onHome,
   onSettings,
   onLevelComplete,
   onUseHint,
-  onShowRewardedAd,
+  onSpendCoins,
   playSound,
   vibrate,
 }) {
@@ -36,13 +36,11 @@ export default function Game({
 
   const [showComplete, setShowComplete] = useState(false);
 
-  // Load level on mount or when level changes
   useEffect(() => {
     loadLevel(level);
     setShowComplete(false);
   }, [level, loadLevel]);
 
-  // Handle win
   useEffect(() => {
     if (state.gameStatus === 'complete') {
       playSound('complete');
@@ -55,25 +53,19 @@ export default function Game({
     (index) => {
       if (state.gameStatus !== 'playing') return;
 
-      playSound('button');
-
       if (state.selectedTube === null) {
-        // Select a tube (must have balls)
         if (state.tubes[index].length === 0) return;
         selectTube(index);
         playSound('pick');
         vibrate(10);
       } else if (state.selectedTube === index) {
-        // Deselect
         deselect();
       } else {
-        // Attempt move
         if (isValidMove(state.tubes, state.selectedTube, index)) {
           moveBalls(state.selectedTube, index);
           playSound('drop');
           vibrate(5);
         } else {
-          // Invalid move
           playSound('invalid');
           vibrate([20, 10, 20]);
           setShaking(index);
@@ -85,25 +77,35 @@ export default function Game({
   );
 
   const handleHint = useCallback(() => {
-    if (hintsRemaining <= 0) {
-      // Show rewarded ad to get hints
-      onShowRewardedAd?.();
-      return;
+    if (hintsRemaining > 0) {
+      const hint = getHint(state.tubes);
+      if (hint) {
+        setHint(hint);
+        onUseHint();
+        playSound('button');
+      }
+    } else if (coins >= COINS_CONFIG.HINT_COST) {
+      onSpendCoins(COINS_CONFIG.HINT_COST);
+      const hint = getHint(state.tubes);
+      if (hint) {
+        setHint(hint);
+        playSound('button');
+      }
+    } else {
+      playSound('invalid');
     }
-    const hint = getHint(state.tubes);
-    if (hint) {
-      setHint(hint);
-      onUseHint();
-      playSound('button');
-    }
-  }, [state.tubes, hintsRemaining, setHint, onUseHint, onShowRewardedAd, playSound]);
+  }, [state.tubes, hintsRemaining, coins, setHint, onUseHint, onSpendCoins, playSound]);
 
   const handleAddTube = useCallback(() => {
     if (state.extraTubeUsed) return;
-    // Could show rewarded ad here
-    addTube();
-    playSound('button');
-  }, [state.extraTubeUsed, addTube, playSound]);
+    if (coins >= COINS_CONFIG.EXTRA_TUBE_COST) {
+      onSpendCoins(COINS_CONFIG.EXTRA_TUBE_COST);
+      addTube();
+      playSound('button');
+    } else {
+      playSound('invalid');
+    }
+  }, [state.extraTubeUsed, coins, addTube, onSpendCoins, playSound]);
 
   const handleUndo = useCallback(() => {
     undo();
@@ -116,14 +118,10 @@ export default function Game({
     setShowComplete(false);
   }, [restart, playSound]);
 
-  // Calculate grid layout
   const tubeCount = state.tubes.length;
   const cols = tubeCount <= 6 ? 3 : tubeCount <= 8 ? 4 : tubeCount <= 10 ? 5 : 6;
-
-  // Responsive ball size
   const ballSize = tubeCount <= 8 ? 34 : tubeCount <= 10 ? 30 : 26;
 
-  // Check which tubes are complete (for celebration animation)
   const completeTubes = useMemo(() => {
     if (state.gameStatus !== 'complete') return new Set();
     return new Set(
@@ -134,16 +132,16 @@ export default function Game({
   }, [state.tubes, state.gameStatus]);
 
   return (
-    <div className="flex flex-col h-full">
-      <TopBar level={state.level} moves={state.moves} onSettings={onSettings} onHome={onHome} />
+    <div className="flex flex-col h-full relative z-10">
+      <TopBar level={state.level} moves={state.moves} coins={coins} onSettings={onSettings} onHome={onHome} />
 
       {/* Game board */}
       <div className="flex-1 flex items-center justify-center px-2">
         <div
-          className="grid gap-2 justify-items-center"
+          className="grid gap-3 justify-items-center"
           style={{
             gridTemplateColumns: `repeat(${cols}, 1fr)`,
-            maxWidth: cols * (ballSize + 28),
+            maxWidth: cols * (ballSize + 32),
           }}
         >
           {state.tubes.map((balls, i) => (
@@ -171,9 +169,9 @@ export default function Game({
         canUndo={state.moveHistory.length > 0}
         canAddTube={!state.extraTubeUsed}
         hintsRemaining={hintsRemaining}
+        coins={coins}
       />
 
-      {/* Level complete */}
       <Confetti active={state.gameStatus === 'complete'} />
       {showComplete && (
         <LevelComplete
