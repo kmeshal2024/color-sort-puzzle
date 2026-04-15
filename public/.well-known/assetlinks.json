@@ -3,6 +3,6 @@
   "target": {
     "namespace": "android_app",
     "package_name": "com.colorsortpuzzle.app",
-    "sha256_cert_fingerprints": ["YOUR_SHA256_FINGERPRINT"]
+    "sha256_cert_fingerprints": ["C7:4D:47:60:D7:A2:D3:3B:B8:C9:77:35:FF:5D:0C:66:0A:B3:17:14:F9:ED:E4:98:F2:10:CA:51:4A:7F:30:87"]
   }
 }]
