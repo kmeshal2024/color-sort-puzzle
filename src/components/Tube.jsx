@@ -63,14 +63,14 @@ export default function Tube({
               rgba(255,255,255,0.12) 85%,
               rgba(255,255,255,0.06) 100%
             )`,
-            border: `2px solid ${
-              isSelected
-                ? 'rgba(100, 180, 255, 0.7)'
-                : isHintFrom
-                ? 'rgba(255, 204, 0, 0.7)'
-                : isHintTo
-                ? 'rgba(68, 255, 68, 0.7)'
-                : 'rgba(255,255,255,0.18)'
+            borderLeft: `2px solid ${
+              isSelected ? 'rgba(100, 180, 255, 0.7)' : isHintFrom ? 'rgba(255, 204, 0, 0.7)' : isHintTo ? 'rgba(68, 255, 68, 0.7)' : 'rgba(255,255,255,0.18)'
+            }`,
+            borderRight: `2px solid ${
+              isSelected ? 'rgba(100, 180, 255, 0.7)' : isHintFrom ? 'rgba(255, 204, 0, 0.7)' : isHintTo ? 'rgba(68, 255, 68, 0.7)' : 'rgba(255,255,255,0.18)'
+            }`,
+            borderBottom: `2px solid ${
+              isSelected ? 'rgba(100, 180, 255, 0.7)' : isHintFrom ? 'rgba(255, 204, 0, 0.7)' : isHintTo ? 'rgba(68, 255, 68, 0.7)' : 'rgba(255,255,255,0.18)'
             }`,
             borderTop: 'none',
             boxShadow: isSelected
